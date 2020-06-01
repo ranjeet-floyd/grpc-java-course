@@ -1,6 +1,13 @@
 package com.ranjeet.course.grpc.client;
 
 import com.proto.dummy.DummyServiceGrpc;
+import com.ranjeet.proto.calculation.CalculationRequest;
+import com.ranjeet.proto.calculation.CalculationResponse;
+import com.ranjeet.proto.calculation.CalculationServiceGrpc;
+import com.ranjeet.proto.greet.GreetRequest;
+import com.ranjeet.proto.greet.GreetResponse;
+import com.ranjeet.proto.greet.GreetServiceGrpc;
+import com.ranjeet.proto.greet.Greeting;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
@@ -14,13 +21,41 @@ public class GreetingClient {
 
     System.out.println("Creating stub");
     // sync client
-    DummyServiceGrpc.DummyServiceBlockingStub sync = DummyServiceGrpc.newBlockingStub(channel);
+//    DummyServiceGrpc.DummyServiceBlockingStub sync = DummyServiceGrpc.newBlockingStub(channel);
     //async client
 //    DummyServiceGrpc.DummyServiceFutureStub async = DummyServiceGrpc.newFutureStub(channel);
+
+    GreetServiceGrpc.GreetServiceBlockingStub syncGreetClient = GreetServiceGrpc.newBlockingStub(channel);
+
+    // build greet request
+    Greeting greeting = Greeting.newBuilder()
+        .setFirstName("Ranjeet")
+        .setLastName("Kumar")
+        .build();
+    GreetRequest greetRequest = GreetRequest.newBuilder()
+        .setGreeting(greeting)
+        .build();
+
+    // call greet service method
+    GreetResponse greetResponse = syncGreetClient.greet(greetRequest);
+
+    // print response
+    System.out.println(greetResponse);
     
-    // call service method
-//    sync.
-    
+    // calculation service
+    CalculationServiceGrpc.CalculationServiceBlockingStub calculationSyncClient = CalculationServiceGrpc.newBlockingStub(channel);
+
+    CalculationRequest request = CalculationRequest.newBuilder()
+        .setA(5)
+        .setB(6)
+        .build();
+
+    CalculationResponse sum = calculationSyncClient.sum(request);
+
+    // print sum result
+    System.out.println(sum);
+
+
     //shutdown channel
     System.out.println("Shutting down channel");
     channel.shutdown();

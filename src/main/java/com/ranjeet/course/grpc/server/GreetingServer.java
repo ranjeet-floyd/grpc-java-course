@@ -10,6 +10,7 @@ public class GreetingServer {
 
     Server server = ServerBuilder.forPort(5666)
         .addService(new GreetServiceImpl())
+        .addService(new CalculationServiceImpl())
         .build();
     server.start();
     
@@ -19,7 +20,7 @@ public class GreetingServer {
       server.shutdown();
       System.out.println("Successfully stopped server");
     }));
-    
+    System.out.println("gRPC server started...");
     // keep running server
     server.awaitTermination();
     

@@ -1,0 +1,26 @@
+// Sum api -> calculation
+
+syntax = "proto3";
+option  java_multiple_files  = true;
+option  java_package =  "com.ranjeet.proto.calculation";
+
+package calculation;
+
+// sum calculation request
+message CalculationRequest {
+  int32 a =1;
+  int32 b = 2;
+}
+
+// sum calculation response
+message CalculationResponse {
+  int32 result = 1;
+}
+
+// sum service
+service CalculationService {
+  rpc sum(CalculationRequest) returns (CalculationResponse) {};
+}
+
+
+
