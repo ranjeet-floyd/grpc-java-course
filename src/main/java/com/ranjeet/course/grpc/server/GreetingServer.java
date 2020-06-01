@@ -1,4 +1,4 @@
-package com.ranjeet.course.grpc;
+package com.ranjeet.course.grpc.server;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
