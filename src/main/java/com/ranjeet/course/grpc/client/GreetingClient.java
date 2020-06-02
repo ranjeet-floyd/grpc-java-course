@@ -1,8 +1,8 @@
 package com.ranjeet.course.grpc.client;
 
-import com.ranjeet.proto.calculation.CalculationRequest;
-import com.ranjeet.proto.calculation.CalculationResponse;
-import com.ranjeet.proto.calculation.CalculationServiceGrpc;
+import com.ranjeet.proto.calculator.CalculatorRequest;
+import com.ranjeet.proto.calculator.CalculatorResponse;
+import com.ranjeet.proto.calculator.CalculatorServiceGrpc;
 import com.ranjeet.proto.greet.GreetManyRequest;
 import com.ranjeet.proto.greet.GreetManyResponse;
 import com.ranjeet.proto.greet.GreetRequest;
@@ -45,14 +45,15 @@ public class GreetingClient {
     System.out.println(greetResponse);
     
     // calculation service
-    CalculationServiceGrpc.CalculationServiceBlockingStub calculationSyncClient = CalculationServiceGrpc.newBlockingStub(channel);
+    CalculatorServiceGrpc.CalculatorServiceBlockingStub calculationSyncClient =
+        CalculatorServiceGrpc.newBlockingStub(channel);
 
-    CalculationRequest request = CalculationRequest.newBuilder()
+    CalculatorRequest request = CalculatorRequest.newBuilder()
         .setA(5)
         .setB(6)
         .build();
 
-    CalculationResponse sum = calculationSyncClient.sum(request);
+    CalculatorResponse sum = calculationSyncClient.sum(request);
 
     // print sum result
     System.out.println(sum);
