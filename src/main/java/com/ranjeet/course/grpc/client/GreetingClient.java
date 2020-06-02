@@ -1,15 +1,17 @@
 package com.ranjeet.course.grpc.client;
 
-import com.proto.dummy.DummyServiceGrpc;
 import com.ranjeet.proto.calculation.CalculationRequest;
 import com.ranjeet.proto.calculation.CalculationResponse;
 import com.ranjeet.proto.calculation.CalculationServiceGrpc;
+import com.ranjeet.proto.greet.GreetManyRequest;
+import com.ranjeet.proto.greet.GreetManyResponse;
 import com.ranjeet.proto.greet.GreetRequest;
 import com.ranjeet.proto.greet.GreetResponse;
 import com.ranjeet.proto.greet.GreetServiceGrpc;
 import com.ranjeet.proto.greet.Greeting;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import java.util.Iterator;
 
 public class GreetingClient {
   public static void main(String[] args) {
@@ -55,10 +57,23 @@ public class GreetingClient {
     // print sum result
     System.out.println(sum);
 
+    // client for server stream
+    GreetServiceGrpc.GreetServiceBlockingStub clientSyncServerStream = GreetServiceGrpc.newBlockingStub(channel);
+    GreetManyRequest greetManyRequest = GreetManyRequest.newBuilder()
+        .setGreeting(Greeting.newBuilder()
+            .setFirstName("Ranjeet")
+            .setLastName("Kumar").build())
+        .build();
+    Iterator<GreetManyResponse> greetManyResponseIterator = clientSyncServerStream.greetManyTimes(greetManyRequest);
+
+    while (greetManyResponseIterator.hasNext()) {
+      System.out.println(greetManyResponseIterator.next());
+    }
+
 
     //shutdown channel
     System.out.println("Shutting down channel");
     channel.shutdown();
-    
+
   }
 }
