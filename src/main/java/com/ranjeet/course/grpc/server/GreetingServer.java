@@ -24,6 +24,5 @@ public class GreetingServer {
     // keep running server
     server.awaitTermination();
     
-    
   }
 }

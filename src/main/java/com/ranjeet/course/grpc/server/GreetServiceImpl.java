@@ -6,6 +6,8 @@ import com.ranjeet.proto.greet.GreetRequest;
 import com.ranjeet.proto.greet.GreetResponse;
 import com.ranjeet.proto.greet.GreetServiceGrpc;
 import com.ranjeet.proto.greet.Greeting;
+import com.ranjeet.proto.greet.LongGreetRequest;
+import com.ranjeet.proto.greet.LongGreetResponse;
 import io.grpc.stub.StreamObserver;
 
 public class GreetServiceImpl extends GreetServiceGrpc.GreetServiceImplBase {
@@ -54,6 +56,31 @@ public class GreetServiceImpl extends GreetServiceGrpc.GreetServiceImplBase {
       responseObserver.onCompleted();
     }
 
+  }
 
+  @Override
+  public StreamObserver<LongGreetRequest> longGreet(StreamObserver<LongGreetResponse> responseObserver) {
+    StreamObserver<LongGreetRequest> requestStreamObserver = new StreamObserver<LongGreetRequest>() {
+      String result = "";
+
+      @Override
+      public void onNext(LongGreetRequest value) {
+        result += "Hello " + value.getGreeting().getFirstName() + " !!";
+      }
+
+      @Override
+      public void onError(Throwable t) {
+        // right now .. do nothing
+      }
+
+      @Override
+      public void onCompleted() {
+        // once client is done ..send server response
+        responseObserver.onNext(LongGreetResponse.newBuilder().setResult(result).build());
+        // mark complete
+        responseObserver.onCompleted();
+      }
+    };
+    return requestStreamObserver;
   }
 }
