@@ -3,6 +3,8 @@ package com.ranjeet.course.grpc.client;
 import com.ranjeet.proto.calculator.CalculatorRequest;
 import com.ranjeet.proto.calculator.CalculatorResponse;
 import com.ranjeet.proto.calculator.CalculatorServiceGrpc;
+import com.ranjeet.proto.calculator.PrimeNumberDecompositionRequest;
+import com.ranjeet.proto.calculator.PrimeNumberDecompositionResponse;
 import com.ranjeet.proto.greet.GreetManyRequest;
 import com.ranjeet.proto.greet.GreetManyResponse;
 import com.ranjeet.proto.greet.GreetRequest;
@@ -70,6 +72,18 @@ public class GreetingClient {
     while (greetManyResponseIterator.hasNext()) {
       System.out.println(greetManyResponseIterator.next());
     }
+    
+    // PrimeNumberDecomposition API
+
+    PrimeNumberDecompositionRequest primeNumberDecompositionRequest = PrimeNumberDecompositionRequest.newBuilder()
+        .setNumber(1000)
+        .build();
+    Iterator<PrimeNumberDecompositionResponse> primeNumberDecompositionResponseIterator = calculationSyncClient.primeNumberDecomposition(primeNumberDecompositionRequest);
+
+    System.out.println("PrimeNumberDecomposition API result for :" + primeNumberDecompositionRequest.getNumber());
+    primeNumberDecompositionResponseIterator.forEachRemaining(v -> {
+      System.out.println(v.getResult());
+    });
 
 
     //shutdown channel
