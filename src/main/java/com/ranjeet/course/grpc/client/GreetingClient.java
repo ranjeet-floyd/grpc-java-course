@@ -19,10 +19,14 @@ import com.ranjeet.proto.greet.LongGreetRequest;
 import com.ranjeet.proto.greet.LongGreetResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.stub.StreamObserver;
+import java.io.File;
 import java.util.Iterator;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import javax.net.ssl.SSLException;
 
 public class GreetingClient {
   public static void main(String[] args) {
@@ -34,9 +38,19 @@ public class GreetingClient {
 
   public void run() {
     System.out.println("run grpc client");
-    ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 5666)
-        .usePlaintext()
-        .build();
+//    ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 5666)
+//        .usePlaintext()
+//        .build();  
+ 
+    // With server authentication SSL/TLS; custom CA root certificates; not on Android
+    ManagedChannel secureChannel = null;
+    try {
+      secureChannel = NettyChannelBuilder.forAddress("localhost", 5666)
+          .sslContext(GrpcSslContexts.forClient().trustManager(new File("ssl/ca.crt")).build())
+          .build();
+    } catch (SSLException e) {
+      e.printStackTrace();
+    }
 
 //    doUnaryCall(channel);
 //    doServerStreamCall(channel);
@@ -46,10 +60,10 @@ public class GreetingClient {
     // BiDi stream
 //    doBiDiStreamCall(channel);
 
-    doDeadLineCall(channel);
+    doDeadLineCall(secureChannel);
     //shutdown channel
     System.out.println("Shutting down channel");
-    channel.shutdown();
+    secureChannel.shutdown();
   }
 
   private void doDeadLineCall(ManagedChannel channel) {
