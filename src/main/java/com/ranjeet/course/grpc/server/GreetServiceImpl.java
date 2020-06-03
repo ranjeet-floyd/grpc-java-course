@@ -1,5 +1,7 @@
 package com.ranjeet.course.grpc.server;
 
+import com.ranjeet.proto.greet.GreetEveryOneRequest;
+import com.ranjeet.proto.greet.GreetEveryOneResponse;
 import com.ranjeet.proto.greet.GreetManyRequest;
 import com.ranjeet.proto.greet.GreetManyResponse;
 import com.ranjeet.proto.greet.GreetRequest;
@@ -14,12 +16,12 @@ public class GreetServiceImpl extends GreetServiceGrpc.GreetServiceImplBase {
 
   @Override
   public void greet(GreetRequest request, StreamObserver<GreetResponse> responseObserver) {
-    
+
     // extract field from request
     Greeting requestGreeting = request.getGreeting();
     String firstName = requestGreeting.getFirstName();
     String lastName = requestGreeting.getLastName();
-    
+
     // build result
     String result = "Hello " + firstName + " " + lastName;
 
@@ -81,6 +83,32 @@ public class GreetServiceImpl extends GreetServiceGrpc.GreetServiceImplBase {
         responseObserver.onCompleted();
       }
     };
+    return requestStreamObserver;
+  }
+
+
+  @Override
+  public StreamObserver<GreetEveryOneRequest> greetEveryOne(StreamObserver<GreetEveryOneResponse> responseObserver) {
+    StreamObserver<GreetEveryOneRequest> requestStreamObserver = new StreamObserver<GreetEveryOneRequest>() {
+      @Override
+      public void onNext(GreetEveryOneRequest value) {
+        responseObserver.onNext(GreetEveryOneResponse.newBuilder()
+            .setResult("Hello from server " + value.getGreeting().getFirstName())
+            .build());
+      }
+
+      @Override
+      public void onError(Throwable t) {
+        System.out.println("Error : " + t.getMessage());
+
+      }
+
+      @Override
+      public void onCompleted() {
+        responseObserver.onCompleted();
+      }
+    };
+
     return requestStreamObserver;
   }
 }

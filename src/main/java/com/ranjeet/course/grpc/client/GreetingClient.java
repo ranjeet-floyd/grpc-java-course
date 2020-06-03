@@ -5,6 +5,8 @@ import com.ranjeet.proto.calculator.CalculatorResponse;
 import com.ranjeet.proto.calculator.CalculatorServiceGrpc;
 import com.ranjeet.proto.calculator.PrimeNumberDecompositionRequest;
 import com.ranjeet.proto.calculator.PrimeNumberDecompositionResponse;
+import com.ranjeet.proto.greet.GreetEveryOneRequest;
+import com.ranjeet.proto.greet.GreetEveryOneResponse;
 import com.ranjeet.proto.greet.GreetManyRequest;
 import com.ranjeet.proto.greet.GreetManyResponse;
 import com.ranjeet.proto.greet.GreetRequest;
@@ -29,21 +31,84 @@ public class GreetingClient {
   }
 
   public void run() {
+    System.out.println("run grpc client");
     ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 5666)
         .usePlaintext()
         .build();
 
 //    doUnaryCall(channel);
 //    doServerStreamCall(channel);
+    // client stream
+//    doClientStreamCall(channel);
 
-    doClientStreamCall(channel);
+    // BiDi stream
+    doBiDiStreamCall(channel);
 
     //shutdown channel
     System.out.println("Shutting down channel");
     channel.shutdown();
   }
 
-  private void doClientStreamCall(ManagedChannel channel)  {
+  private void doBiDiStreamCall(ManagedChannel channel) {
+    System.out.println("BiDi stream");
+    final GreetServiceGrpc.GreetServiceStub bidiClient = GreetServiceGrpc.newStub(channel);
+    final CountDownLatch latch = new CountDownLatch(1);
+    StreamObserver<GreetEveryOneRequest> requestStreamObserver = bidiClient.greetEveryOne(new StreamObserver<GreetEveryOneResponse>() {
+      @Override
+      public void onNext(GreetEveryOneResponse value) {
+        System.out.println("Got response from server");
+        System.out.println(value.getResult());
+      }
+
+      @Override
+      public void onError(Throwable t) {
+        System.out.println("Error : " + t.getMessage());
+        latch.countDown();
+      }
+
+      @Override
+      public void onCompleted() {
+        System.out.println("Server response completed.");
+        latch.countDown();
+      }
+    });
+
+    requestStreamObserver.onNext(GreetEveryOneRequest.newBuilder()
+        .setGreeting(Greeting.newBuilder()
+            .setFirstName("Ranjeet1")
+            .build())
+        .build());
+    requestStreamObserver.onNext(GreetEveryOneRequest.newBuilder()
+        .setGreeting(Greeting.newBuilder()
+            .setFirstName("Ranjeet2")
+            .build())
+        .build());
+    requestStreamObserver.onNext(GreetEveryOneRequest.newBuilder()
+        .setGreeting(Greeting.newBuilder()
+            .setFirstName("Ranjeet3")
+            .build())
+        .build());
+    requestStreamObserver.onNext(GreetEveryOneRequest.newBuilder()
+        .setGreeting(Greeting.newBuilder()
+            .setFirstName("Ranjeet4")
+            .build())
+        .build());
+    requestStreamObserver.onNext(GreetEveryOneRequest.newBuilder()
+        .setGreeting(Greeting.newBuilder()
+            .setFirstName("Ranjeet4")
+            .build())
+        .build());
+
+    requestStreamObserver.onCompleted();
+
+    try {
+      latch.await(3, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void doClientStreamCall(ManagedChannel channel) {
     GreetServiceGrpc.GreetServiceStub asyncGreetClient = GreetServiceGrpc.newStub(channel);
     final CountDownLatch latch = new CountDownLatch(1);
     StreamObserver<LongGreetRequest> requestStreamObserver = asyncGreetClient.longGreet(new StreamObserver<LongGreetResponse>() {
@@ -84,7 +149,7 @@ public class GreetingClient {
         .build());
     System.out.println("Done request");
     requestStreamObserver.onCompleted();
-    
+
     // ....
     try {
       latch.await(3, TimeUnit.SECONDS);
