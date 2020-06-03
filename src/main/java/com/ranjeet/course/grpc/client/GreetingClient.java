@@ -24,14 +24,8 @@ public class GreetingClient {
   public static void main(String[] args) {
     System.out.println("Hello gRPC client !!");
     System.out.println("Run");
+    // run grpc client
     new GreetingClient().run();
-
-    
-
-
-    // client streaming
-
-
   }
 
   public void run() {
