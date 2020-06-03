@@ -23,11 +23,20 @@ message PrimeNumberDecompositionRequest{
 message PrimeNumberDecompositionResponse {
   int32 result = 1;
 }
+//
+message SquareRootRequest {
+  int32  number = 1;
+}
+message SquareRootResponse {
+  double result = 1;
+}
 
 // sum service
 service CalculatorService {
   rpc sum(CalculatorRequest) returns (CalculatorResponse) {};
   rpc primeNumberDecomposition(PrimeNumberDecompositionRequest) returns (stream PrimeNumberDecompositionResponse){};
+ // if request number is negative throw Illigal arg exception.
+  rpc squareRoot(SquareRootRequest) returns (SquareRootResponse);
 }
 
 

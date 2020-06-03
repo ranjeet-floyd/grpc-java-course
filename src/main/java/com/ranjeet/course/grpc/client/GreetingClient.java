@@ -12,6 +12,8 @@ import com.ranjeet.proto.greet.GreetManyResponse;
 import com.ranjeet.proto.greet.GreetRequest;
 import com.ranjeet.proto.greet.GreetResponse;
 import com.ranjeet.proto.greet.GreetServiceGrpc;
+import com.ranjeet.proto.greet.GreetWithDeadLineRequest;
+import com.ranjeet.proto.greet.GreetWithDeadLineResponse;
 import com.ranjeet.proto.greet.Greeting;
 import com.ranjeet.proto.greet.LongGreetRequest;
 import com.ranjeet.proto.greet.LongGreetResponse;
@@ -42,11 +44,39 @@ public class GreetingClient {
 //    doClientStreamCall(channel);
 
     // BiDi stream
-    doBiDiStreamCall(channel);
+//    doBiDiStreamCall(channel);
 
+    doDeadLineCall(channel);
     //shutdown channel
     System.out.println("Shutting down channel");
     channel.shutdown();
+  }
+
+  private void doDeadLineCall(ManagedChannel channel) {
+    GreetServiceGrpc.GreetServiceBlockingStub syncClient = GreetServiceGrpc.newBlockingStub(channel);
+
+    GreetWithDeadLineRequest deadLineRequest = GreetWithDeadLineRequest.newBuilder()
+        .setGreeting(Greeting.newBuilder()
+            .setFirstName("Ranjeet").build())
+        .build();
+
+    GreetWithDeadLineResponse deadLineResponseSuccess = syncClient
+        .withDeadlineAfter(4000, TimeUnit.MILLISECONDS)
+        .greetWithDeadLine(deadLineRequest);
+
+    System.out.println("Got response : " + deadLineResponseSuccess.getResult());
+
+    // fail due to timeout
+    try {
+      GreetWithDeadLineResponse deadLineResponseFail = syncClient
+          .withDeadlineAfter(400, TimeUnit.MILLISECONDS)
+          .greetWithDeadLine(deadLineRequest);
+      System.out.println("Should not print : " + deadLineResponseFail.getResult());
+    } catch (Exception ex) {
+      System.out.println("Error : " + ex.getMessage());
+    }
+
+
   }
 
   private void doBiDiStreamCall(ManagedChannel channel) {

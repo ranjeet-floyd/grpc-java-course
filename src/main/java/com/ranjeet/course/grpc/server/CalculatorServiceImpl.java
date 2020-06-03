@@ -5,6 +5,9 @@ import com.ranjeet.proto.calculator.CalculatorResponse;
 import com.ranjeet.proto.calculator.CalculatorServiceGrpc;
 import com.ranjeet.proto.calculator.PrimeNumberDecompositionRequest;
 import com.ranjeet.proto.calculator.PrimeNumberDecompositionResponse;
+import com.ranjeet.proto.calculator.SquareRootRequest;
+import com.ranjeet.proto.calculator.SquareRootResponse;
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 
 public class CalculatorServiceImpl extends CalculatorServiceGrpc.CalculatorServiceImplBase {
@@ -44,5 +47,22 @@ public class CalculatorServiceImpl extends CalculatorServiceGrpc.CalculatorServi
       }
     }
     responseObserver.onCompleted();
+  }
+
+  @Override
+  public void squareRoot(SquareRootRequest request, StreamObserver<SquareRootResponse> responseObserver) {
+    int number = request.getNumber();
+    if(number > 0 ) {
+      double result = Math.sqrt(number);
+      responseObserver.onNext(SquareRootResponse.newBuilder()
+          .setResult(result)
+          .build());
+      responseObserver.onCompleted();
+    }
+    else {
+      responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Input request number must be positive")
+          .augmentDescription("Request number is : "+ number)
+          .asRuntimeException());
+    }
   }
 }

@@ -7,9 +7,12 @@ import com.ranjeet.proto.greet.GreetManyResponse;
 import com.ranjeet.proto.greet.GreetRequest;
 import com.ranjeet.proto.greet.GreetResponse;
 import com.ranjeet.proto.greet.GreetServiceGrpc;
+import com.ranjeet.proto.greet.GreetWithDeadLineRequest;
+import com.ranjeet.proto.greet.GreetWithDeadLineResponse;
 import com.ranjeet.proto.greet.Greeting;
 import com.ranjeet.proto.greet.LongGreetRequest;
 import com.ranjeet.proto.greet.LongGreetResponse;
+import io.grpc.Context;
 import io.grpc.stub.StreamObserver;
 
 public class GreetServiceImpl extends GreetServiceGrpc.GreetServiceImplBase {
@@ -110,5 +113,31 @@ public class GreetServiceImpl extends GreetServiceGrpc.GreetServiceImplBase {
     };
 
     return requestStreamObserver;
+  }
+
+  @Override
+  public void greetWithDeadLine(GreetWithDeadLineRequest request, StreamObserver<GreetWithDeadLineResponse> responseObserver) {
+
+    Context context = Context.current();
+    for (int i = 0; i < 3; i++) {
+      System.out.println("Sleep for 1sec");
+      if(!context.isCancelled()) {
+        try {
+          Thread.sleep(1000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+      else {
+        System.out.println("Request cancelled");
+        return;
+      }
+    }
+   
+    responseObserver.onNext(GreetWithDeadLineResponse.newBuilder()
+        .setResult( "Hello from server  " + request.getGreeting().getFirstName())
+        .build());
+    
+    responseObserver.onCompleted();
   }
 }
